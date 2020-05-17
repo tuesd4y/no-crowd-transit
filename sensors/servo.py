@@ -38,7 +38,7 @@ class Servo(QtWidgets.QMainWindow):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        if self.direction is not "off":
+        if self.direction != "off":
             painter.drawPolygon(self.pointsDown) if self.direction == "down" else painter.drawPolygon(self.pointsUp)
 
     def on(self, direction):

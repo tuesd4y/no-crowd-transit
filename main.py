@@ -17,7 +17,9 @@ class Main(QtWidgets.QMainWindow):
         self.piListWidget = self.findChild(QtWidgets.QListWidget, 'lPis')
         self.piListWidget.addItem("pi1")
         self.piListWidget.addItem("pi2")
+
         self.show()
+        QtWidgets.QMainWindow.resize(self, 1000, 600)
 
     def set_window_location(self, x, y):
         self.move(x,y)

@@ -27,41 +27,24 @@ from sensors.weightSensor import WeightSensor
 class RaspberryPi2(AbstractRaspberryPi):
     def __init__(self):
         self.activeSensors = {}
-        self.initialSensors = {"gyro": GyroSensor}
+        self.initialSensors = {"gyro": GyroSensor, "camera": CameraSensor,
+                               "distance": DistanceSensor}
         self.sensorCnt = 0
         AbstractRaspberryPi.__init__(self, "pi2", 5556, 5555)
 
-        for s in self.initialSensors:
-            self.add_sensor(self.initialSensors[s], s)
-
-        self.show()
-
-        # communication
-        self.sender = AbstractSender(self.s_port)
-        self.receiver = AbstractReceiver(self.r_port)
-        self.lock = threading.Lock()
-        threading.Thread(target=self.receiver_thread).start()
-
-        # start sampling
-        threading.Thread(target=self.sampling_thread).start()
 
     def set_window_location(self, x, y):
         self.move(x,y)
 
-    def receiver_thread(self):
-        while True:
-            incoming_request = self.receiver.socket.recv()
-            if "orientation" in str(incoming_request):
-                self.receiver.socket.send_string("p2 sends orientation"+str(self.activeSensors["gyro"].get_orientation()))
+    def on_receive_string(self, message):
+        pass
 
-    def send_message(self, message):
-        self.lock.acquire()
-        self.sender.socket.send_string(message)
-        response = self.sender.socket.recv()
-        self.lock.release()
+    def on_receive_object(self, res):
+        if "orientation" in str(res):
+            self.receiver.socket.send_string("p2 sends orientation"+str(self.activeSensors["gyro"].get_orientation()))
 
     def sampling_thread(self):
         time.sleep(5)
         while True:
-            None
+            pass
             # Do some sampling

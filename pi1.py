@@ -27,41 +27,18 @@ from sensors.weightSensor import WeightSensor
 class RaspberryPi1(AbstractRaspberryPi):
     def __init__(self):
         self.activeSensors = {}
-        self.initialSensors = {"gesture": GestureSensor, "display": Display, "camera": CameraSensor}
+        self.initialSensors = {"gesture": GestureSensor, "display": Display}
         self.sensorCnt = 0
         AbstractRaspberryPi.__init__(self, "pi1", 5555, 5556)
 
-        for s in self.initialSensors:
-            self.add_sensor(self.initialSensors[s], s)
-
-        self.show()
-
-        # communication
-        self.sender = AbstractSender(self.s_port)
-        self.receiver = AbstractReceiver(self.r_port)
-        self.lock = threading.Lock()
-        threading.Thread(target=self.receiver_thread).start()
-
-        # start sampling
-        threading.Thread(target=self.sampling_thread).start()
-
     def set_window_location(self, x, y):
-        self.move(x,y)
+        self.move(x, y)
 
-    def receiver_thread(self):
-        while True:
-            incoming_request = self.receiver.socket.recv()
-
-    def send_message(self, message):
-        self.lock.acquire()
-        self.sender.socket.send_string(message)
-        response = self.sender.socket.recv()
-        if "orientation" in str(response):
-            self.activeSensors["display"].on(str(response))
-        self.lock.release()
 
     def sampling_thread(self):
         time.sleep(5)
         while True:
             if self.activeSensors["gesture"].get_gesture() == "Up":
-                self.send_message("p1 request orientation")
+                response = self.send_message("p1 request orientation")
+                if "orientation" in str(response):
+                    self.activeSensors["display"].on(str(response))

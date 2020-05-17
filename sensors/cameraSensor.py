@@ -29,7 +29,7 @@ class CameraSensor(QtWidgets.QMainWindow):
         self.running = False
 
         # set your video path here
-        self.videoPath = ""
+        self.videoPath = "/Users/dev/Downloads/wall.mp4"
 
         # if you don't get a camera image change this to another index
         self.camIndex = 0
@@ -70,12 +70,16 @@ class CameraSensor(QtWidgets.QMainWindow):
         return self.img
 
     def video_thread(self):
+        cv2.startWindowThread()
+        key = 0
         while self.running:
             ret, frame = self.cam.read()
             self.img = frame
             if self.liveView and ret:
+                cv2.imwrite('/Users/dev/Downloads/test.png', self.img)
                 cv2.imshow("Live Image "+self.name, frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+                key = cv2.waitKey()
+            if key & 0xFF == ord('q'):
                 break
         self.cam.release()
         cv2.destroyAllWindows()
