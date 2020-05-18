@@ -3,12 +3,14 @@ import threading
 from PyQt5 import uic, QtWidgets
 import cv2
 from PyQt5.QtWidgets import QLabel, QPushButton, QRadioButton
+from rx.subject import Subject
 
 
 class CameraSensor(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(CameraSensor, self).__init__()
+        self.subject = Subject()
         uic.loadUi('ui/camera.ui', self)
         self.rCamera = self.findChild(QRadioButton, 'rCamera')
         self.rCamera.setChecked(True)
@@ -34,15 +36,17 @@ class CameraSensor(QtWidgets.QMainWindow):
         # if you don't get a camera image change this to another index
         self.camIndex = 0
 
+        # self.img_stream = defer()
+
     def set_window_location(self, x, y):
-        self.move(x,y)
+        self.move(x, y)
 
     def start(self):
         if not self.running:
             self.cam = cv2.VideoCapture(self.videoPath) if self.mode == "Video" else cv2.VideoCapture(self.camIndex)
             self.rCamera.setEnabled(False)
             self.rVideo.setEnabled(False)
-            self.running=True
+            self.running = True
             threading.Thread(target=self.video_thread).start()
             self.bStart.setText("Stop")
         else:
@@ -77,10 +81,16 @@ class CameraSensor(QtWidgets.QMainWindow):
             self.img = frame
             if self.liveView and ret:
                 cv2.imwrite('/Users/dev/Downloads/test.png', self.img)
-                cv2.imshow("Live Image "+self.name, frame)
+                cv2.imshow("Live Image " + self.name, frame)
                 key = cv2.waitKey()
             if key & 0xFF == ord('q'):
                 break
+
+            self.subject.on_next(frame)
+
+            # publish image to rx stream here
+
         self.cam.release()
         cv2.destroyAllWindows()
         self.cam = None
+        self.subject.on_completed()

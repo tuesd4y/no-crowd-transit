@@ -1,5 +1,8 @@
+import json
 import threading
+from json import JSONDecodeError
 
+import jsonpickle as jsonpickle
 import zmq
 from PyQt5 import QtWidgets, uic
 
@@ -48,10 +51,16 @@ class AbstractRaspberryPi(QtWidgets.QMainWindow):
         :return: the response
         """
         self.lock.acquire()
-        self.sender.socket.send_string(message)
-        response = self.sender.socket.recv()
+        if type(message) == str:
+            self.sender.socket.send_string(message)
+        else:
+            self.sender.socket.send_string(jsonpickle.encode(message))
         self.lock.release()
+        response = self.sender.socket.recv()
         return response
+
+    def respond(self, message):
+        self.receiver.socket.send_string(message)
 
     def on_receive_string(self, message):
         """
@@ -79,10 +88,12 @@ class AbstractRaspberryPi(QtWidgets.QMainWindow):
         for (socket, count) in results:
             if socket == self.receiver.socket and count > 0:
                 res = self.receiver.socket.recv()
-                if res is str:
+                try:
+                    resJson = jsonpickle.decode(res)
+                    self.on_receive_object(resJson)
+                except Exception:
+                    # object wasn't a JSON so we just treat it like a string
                     self.on_receive_string(res)
-                else:
-                    self.on_receive_object(res)
 
     def receiver_thread(self):
         while True:

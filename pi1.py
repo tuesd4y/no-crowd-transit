@@ -1,27 +1,9 @@
-import threading
 import time
 
 from abstractPi import AbstractRaspberryPi
-from communication.abstractReceiver import AbstractReceiver
-from communication.abstractSender import AbstractSender
-from sensors.accelSensor import AccelSensor
-from sensors.audio import Audio
-from sensors.brightnessSensor import BrightnessSensor
-from sensors.button import Button
-from sensors.cameraSensor import CameraSensor
+from communication.messages import CameraSensorUpdate
 from sensors.display import Display
-from sensors.distanceSensor import DistanceSensor
 from sensors.gesture import GestureSensor
-from sensors.greenLED import GreenLED
-from sensors.gyroSensor import GyroSensor
-from sensors.humiditySensor import HumiditySensor
-from sensors.infraredSensor import InfraredSensor
-from sensors.microphone import MicrophoneSensor
-from sensors.redLED import RedLED
-from sensors.rfidSensor import RFIDSensor
-from sensors.servo import Servo
-from sensors.tempSensor import TempSensor
-from sensors.weightSensor import WeightSensor
 
 
 class RaspberryPi1(AbstractRaspberryPi):
@@ -34,7 +16,6 @@ class RaspberryPi1(AbstractRaspberryPi):
     def set_window_location(self, x, y):
         self.move(x, y)
 
-
     def sampling_thread(self):
         time.sleep(5)
         while True:
@@ -42,3 +23,8 @@ class RaspberryPi1(AbstractRaspberryPi):
                 response = self.send_message("p1 request orientation")
                 if "orientation" in str(response):
                     self.activeSensors["display"].on(str(response))
+
+    def on_receive_object(self, res):
+        if type(res) == CameraSensorUpdate:
+            self.respond("ok")
+            self.activeSensors["display"].on(res.peopleWalkingFromStop)
