@@ -6,3 +6,11 @@ Even though a significant amount of workers are able to (at least temporarily) s
 In order to make commuting via bus and trams in cities safer for all people involved, we aim to create a system for analyzing the utilization of buses and bus stops.  
 
 Furthermore,on the basis of historic utilization data we want to develop a prediction-model for finding optimal commuting routes and times with minimal personal contact.With this system, we aim to allow commuters to get to their target location safe and sound within minimal time
+
+## How to get this up and running
+
+* Clone this repository
+* Install all the dependencies (`pip3 install -r requirements.txt`)
+* Run the `main.py` script
+* Start the camera sensor in pi2: Click the `pi2 camera` tab, select video source and disable liveView, then click start
+* Whenever people move into the stop or out of the stop, a notification is shown on pi1's display.
