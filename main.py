@@ -1,9 +1,10 @@
 import sys
 from PyQt5 import QtWidgets, uic
+
+from people_counter.peopleCounter import PeopleTracker
 from pi1 import RaspberryPi1
 from pi2 import RaspberryPi2
 
-from people_counter import peopleCounter
 
 
 class Main(QtWidgets.QMainWindow):
@@ -22,8 +23,6 @@ class Main(QtWidgets.QMainWindow):
 
         self.show()
         QtWidgets.QMainWindow.resize(self, 1000, 600)
-
-        peopleCounter.analyze()
 
     def set_window_location(self, x, y):
         self.move(x,y)
