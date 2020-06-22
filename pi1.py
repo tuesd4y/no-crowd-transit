@@ -27,4 +27,6 @@ class RaspberryPi1(AbstractRaspberryPi):
     def on_receive_object(self, res):
         if type(res) == CameraSensorUpdate:
             self.respond("ok")
-            self.activeSensors["display"].on(res.peopleWalkingFromStop)
+            print(f"to stop: {res.peopleWalkingTowardsStop}, from stop: {res.peopleWalkingFromStop}")
+            self.activeSensors["display"].on(f"to stop: {res.peopleWalkingTowardsStop}, from stop: {res.peopleWalkingFromStop}")
+

@@ -1,7 +1,10 @@
 import sys
 from PyQt5 import QtWidgets, uic
+
+from people_counter.peopleCounter import PeopleTracker
 from pi1 import RaspberryPi1
 from pi2 import RaspberryPi2
+
 
 
 class Main(QtWidgets.QMainWindow):
