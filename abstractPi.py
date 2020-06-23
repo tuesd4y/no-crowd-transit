@@ -83,14 +83,16 @@ class AbstractRaspberryPi(QtWidgets.QMainWindow):
         Gets executed periodically by the receiver thread.
         If a request is received from the zeroMQ protocol, the on_receive_object() or on_receive_string() method will
         be executed, respectively.
+
+        Our changes to the AbstractPy now also allow sending and receiving python objects using json_pickl underneath!
         """
         results = self.receiver.poller.poll(10)
         for (socket, count) in results:
             if socket == self.receiver.socket and count > 0:
                 res = self.receiver.socket.recv()
                 try:
-                    resJson = jsonpickle.decode(res)
-                    self.on_receive_object(resJson)
+                    res_json = jsonpickle.decode(res)
+                    self.on_receive_object(res_json)
                 except Exception:
                     # object wasn't a JSON so we just treat it like a string
                     self.on_receive_string(res)

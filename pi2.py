@@ -24,49 +24,58 @@ class RaspberryPi2(AbstractRaspberryPi):
         self.sensorCnt = 0
         AbstractRaspberryPi.__init__(self, "pi2", 5556, 5555)
 
-        person_count = 0
         self.camera_start_time = time.time()
         self.cs = self.activeSensors['camera']
 
-        self.towardsStop = 0
-
-        optimal_thread_count = multiprocessing.cpu_count()
-        pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
-
-        # read image from rx stream here
-        # self.cs.subject.pipe(
-        #     op.map(lambda img: np.mean(img)),
-        #     op.buffer_with_count(20),
-        #     op.map(lambda l: statistics.mean(l))
-        # ).subscribe(on_next=self.on_img_received,
-        #             on_completed=self.on_last_image,
-        #             on_error=lambda err: print("errored"),
-        #             scheduler=pool_scheduler)
+        self.regularDistance = 100
 
         self.peopleCounter = PeopleTracker()
+        # if you want to write a debug video (into 'out_video.mp4') set this to true
+        self.peopleCounter.writeVideo = True
         self.peopleCounter.setup()
 
+        # Subscribe to frames of the cameraSensor and delegate
         self.cs.subject.subscribe(on_next=self.on_img_received,
                                   on_completed=self.on_last_image,
                                   on_error=lambda err: print("errored"))
         self.peopleCounter.subject.subscribe(on_next=self.on_people_moved)
 
-    # def on_img_received(self, avg: float):
-        # check if screen is black (average pixel < 120)
-        # if avg < 120:
-        #     self.towardsStop += 1
-        #     res = self.send_message(CameraSensorUpdate(0, self.towardsStop))
-
     def on_people_moved(self, movement):
+        """
+        React on a detected movement from the [PeopleTracker]. This can be for instance a group of two people walking
+        over the camera fieldOfView midway line and therefore into the stop.
+        :param movement: (people moving into the stop, people moving out of the stop)
+        :return: nothing
+        """
         up, down = movement
-        print(f"Should display -- to stop: {down}, from stop: {up}")
+        print(f"Camera detected movement! ->  to stop: {down}, from stop: {up}, now validating")
 
-        self.send_message(CameraSensorUpdate(up, down))
+        # Check if distance sensor validates the movement.
+        # If measured distance is less than expected, then somebody is currently moving through the "measurement line"
+        # of the distance sensor, thus our camera movement is validated and gets sent by message
+        # Otherwise we can ignore the action without any additional handling.
+        current_distance = self.activeSensors['distance'].get_distance()
+        print(f"current_distance: {current_distance}")
+
+        if current_distance < self.regularDistance:
+            self.send_message(CameraSensorUpdate(up, down))
+            print("sent message to pi1")
+        else:
+            print("Distance sensor invalidated peopleTracker data!")
 
     def on_img_received(self, frame):
+        """
+        Delegate the received image to the peopleCounter analyzer
+        :param frame:
+        :return:
+        """
         self.peopleCounter.analyze_frame(frame)
 
     def on_last_image(self):
+        """
+        Stop the peopleCounter when the last frame of the video (or camera) was receivd
+        :return:
+        """
         self.peopleCounter.tear_down()
 
     def set_window_location(self, x, y):

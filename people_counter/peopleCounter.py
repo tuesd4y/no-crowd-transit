@@ -67,7 +67,7 @@ class PeopleTracker:
         # if we are supposed to be writing a video to disk, initialize
         # the writer
         if self.writer is None and self.writeVideo:
-            fourcc = cv2.VideoWriter_fourcc(*"MJPG")
+            fourcc = cv2.VideoWriter_fourcc(*"MP4V")
             self.writer = cv2.VideoWriter("out_video.mp4", fourcc, 30,
                                           (self.W, self.H), True)
 
@@ -80,7 +80,7 @@ class PeopleTracker:
         # check to see if we should run a more computationally expensive
         # object detection method to aid our tracker
         # if totalFrames % args["skip_frames"] == 0:
-        if self.totalFrames % 10 == 0:
+        if self.totalFrames % 3 == 0:
             # set the status and initialize our new set of object trackers
             self.status = "Detecting"
             self.trackers = []
@@ -99,7 +99,7 @@ class PeopleTracker:
 
                 # filter out weak detections by requiring a minimum
                 # confidence
-                if confidence > .7:
+                if confidence > .5:
                     # extract the index of the class label from the
                     # detections list
                     idx = int(detections[0, 0, i, 1])
@@ -245,24 +245,6 @@ class PeopleTracker:
         self.fps.update()
         # print("Total frames are {:d}".format(self.totalFrames))
 
-    # def analyze(self):
-    #
-    #     # loop over frames from the video stream
-    #     while True:
-    #         # grab the next frame and handle if we are reading from either
-    #         # VideoCapture or VideoStream
-    #         # todo call this from the rx stream of the cameraSensor
-    #         frame = self.vs.read()
-    #         # frame = frame[1] if args.get("input", False) else frame
-    #
-    #         frame = frame[1]
-    #
-    #         # if we are viewing a video and we did not grab a frame then we
-    #         # have reached the end of the video
-    #         if frame is None:
-    #             break
-    #
-    #         self.analyze_frame(frame)
 
     def tear_down(self):
         # stop the timer and display FPS information

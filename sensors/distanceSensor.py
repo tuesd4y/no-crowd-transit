@@ -1,3 +1,4 @@
+import random
 import threading
 import time
 
@@ -20,6 +21,7 @@ class DistanceSensor(QtWidgets.QMainWindow):
         self.findChild(QPushButton, 'bMove').clicked.connect(self.perform_movement)
 
         self.name = ""
+        self.count = 0
 
     def set_name(self, name):
         self.name = name
@@ -28,11 +30,11 @@ class DistanceSensor(QtWidgets.QMainWindow):
     def perform_movement(self):
         if float(self.lStepSize.text()) == 0:
             self.distance = float(self.lFrom.text())
-            self.lCurDist.setText("Current Distance: "+str(self.distance))
+            self.lCurDist.setText("Current Distance: " + str(self.distance))
         threading.Thread(target=self.movement_thread).start()
 
     def set_window_location(self, x, y):
-        self.move(x,y)
+        self.move(x, y)
 
     def movement_thread(self):
         f = float(self.lFrom.text())
@@ -51,6 +53,18 @@ class DistanceSensor(QtWidgets.QMainWindow):
                 time.sleep(0.5)
 
     def get_distance(self):
+        # this was changed for demonstration purposes!
+        # return self.distance
+
+        self.distance = random.randrange(20, 80)
+
+        self.count += 1
+
+        # in this if, we can define which results the x-th time the get_distance() is called should provide
+        # This is a mock of the distance sensor, where we can invalidate specific events from the peopleCounter
+        if self.count in [1, 2, 3]:
+            return 100
+
         return self.distance
 
     def set_distance(self, start, to, step_size):

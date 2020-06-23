@@ -10,7 +10,6 @@ class CameraSensor(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(CameraSensor, self).__init__()
-        self.subject = Subject()
         uic.loadUi('ui/camera.ui', self)
         self.rCamera = self.findChild(QRadioButton, 'rCamera')
         self.rCamera.setChecked(True)
@@ -30,13 +29,14 @@ class CameraSensor(QtWidgets.QMainWindow):
         self.bStart.clicked.connect(self.start)
         self.running = False
 
+        # setup an rxPy subject so we can more easily listen to each frame that gets read from the camera / video stream
+        self.subject = Subject()
+
         # set your video path here
-        self.videoPath = "video_examples/example_3.mp4"
+        self.videoPath = "video_examples/example_01.mp4"
 
         # if you don't get a camera image change this to another index
         self.camIndex = 0
-
-        # self.img_stream = defer()
 
     def set_window_location(self, x, y):
         self.move(x, y)
@@ -90,10 +90,11 @@ class CameraSensor(QtWidgets.QMainWindow):
             if frame is None:
                 break
 
+            # publish image to rx stream
             self.subject.on_next(frame)
-            # publish image to rx stream here
 
         self.cam.release()
         # cv2.destroyAllWindows()
         self.cam = None
+        # send on_completed event after all frames from the camera are read
         self.subject.on_completed()
