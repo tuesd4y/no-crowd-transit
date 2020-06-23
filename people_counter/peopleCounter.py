@@ -1,5 +1,3 @@
-# initialize the list of class labels MobileNet SSD was trained to
-# detect
 import cv2
 import dlib
 import imutils
@@ -40,7 +38,7 @@ class PeopleTracker:
         # instantiate our centroid tracker, then initialize a list to store
         # each of our dlib correlation trackers, followed by a dictionary to
         # map each unique object ID to a TrackableObject
-        self.ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
+        self.ct = CentroidTracker(max_disappeared=40, max_distance=50)
         self.trackers = []
         self.trackableObjects = {}
 
@@ -54,6 +52,13 @@ class PeopleTracker:
         self.fps = FPS().start()
 
     def analyze_frame(self, frame):
+        """
+        Analyze a single frame from the video
+        for more documentation, see explanation in the README.md file
+        code inspired by https://www.pyimagesearch.com/2018/08/13/opencv-people-counter/
+        :param frame:
+        :return:
+        """
         # resize the frame to have a maximum width of 500 pixels (the
         # less data we have, the faster we can process it), then convert
         # the frame from BGR to RGB for dlib
@@ -79,7 +84,6 @@ class PeopleTracker:
 
         # check to see if we should run a more computationally expensive
         # object detection method to aid our tracker
-        # if totalFrames % args["skip_frames"] == 0:
         if self.totalFrames % 3 == 0:
             # set the status and initialize our new set of object trackers
             self.status = "Detecting"
@@ -129,8 +133,6 @@ class PeopleTracker:
         else:
             # loop over the trackers
             for tracker in self.trackers:
-                # set the status of our system to be 'tracking' rather
-                # than 'waiting' or 'detecting'
                 status = "Tracking"
 
                 # update the tracker and grab the updated position
@@ -160,14 +162,14 @@ class PeopleTracker:
         up = 0
 
         # loop over the tracked objects
-        for (objectID, centroid) in objects.items():
+        for (id, centroid) in objects.items():
             # check to see if a trackable object exists for the current
             # object ID
-            to = self.trackableObjects.get(objectID, None)
+            to = self.trackableObjects.get(id, None)
 
             # if there is no existing trackable object, create one
             if to is None:
-                to = TrackableObject(objectID, centroid)
+                to = TrackableObject(id, centroid)
 
             # otherwise, there is a trackable object so we can utilize it
             # to determine direction
@@ -199,12 +201,12 @@ class PeopleTracker:
                         to.counted = True
 
             # store the trackable object in our dictionary
-            self.trackableObjects[objectID] = to
+            self.trackableObjects[id] = to
 
             if self.writeVideo:
                 # draw both the ID of the object and the centroid of the
                 # object on the output frame
-                text = "ID {}".format(objectID)
+                text = "ID {}".format(id)
                 cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)

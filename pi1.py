@@ -1,7 +1,7 @@
 import time
 
 from abstractPi import AbstractRaspberryPi
-from communication.messages import CameraSensorUpdate
+from communication.messages import MovementUpdate
 from sensors.display import Display
 from sensors.gesture import GestureSensor
 
@@ -33,7 +33,7 @@ class RaspberryPi1(AbstractRaspberryPi):
         :param res:
         :return:
         """
-        if type(res) == CameraSensorUpdate:
+        if type(res) == MovementUpdate:
             self.respond("ok")
 
             # update number of people currently at the stop

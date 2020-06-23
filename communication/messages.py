@@ -1,4 +1,4 @@
-class CameraSensorUpdate():
+class MovementUpdate():
     def __init__(self, peopleWalkingTowardsStop, peopleWalkingFromStop):
         self.peopleWalkingTowardsStop = peopleWalkingTowardsStop
         self.peopleWalkingFromStop = peopleWalkingFromStop

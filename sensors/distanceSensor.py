@@ -62,7 +62,7 @@ class DistanceSensor(QtWidgets.QMainWindow):
 
         # in this if, we can define which results the x-th time the get_distance() is called should provide
         # This is a mock of the distance sensor, where we can invalidate specific events from the peopleCounter
-        if self.count in [1, 2, 3]:
+        if self.count in [2]:
             return 100
 
         return self.distance

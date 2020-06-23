@@ -1,17 +1,11 @@
-import multiprocessing
-import statistics
 import time
 
-import numpy as np
-from rx.scheduler import ThreadPoolScheduler
-
 from abstractPi import AbstractRaspberryPi
-from communication.messages import CameraSensorUpdate
+from communication.messages import MovementUpdate
 from people_counter.peopleCounter import PeopleTracker
 from sensors.cameraSensor import CameraSensor
 from sensors.distanceSensor import DistanceSensor
 from sensors.gyroSensor import GyroSensor
-from rx import operators as op
 
 
 class RaspberryPi2(AbstractRaspberryPi):
@@ -31,7 +25,7 @@ class RaspberryPi2(AbstractRaspberryPi):
 
         self.peopleCounter = PeopleTracker()
         # if you want to write a debug video (into 'out_video.mp4') set this to true
-        self.peopleCounter.writeVideo = True
+        # self.peopleCounter.writeVideo = True
         self.peopleCounter.setup()
 
         # Subscribe to frames of the cameraSensor and delegate
@@ -58,7 +52,7 @@ class RaspberryPi2(AbstractRaspberryPi):
         print(f"current_distance: {current_distance}")
 
         if current_distance < self.regularDistance:
-            self.send_message(CameraSensorUpdate(up, down))
+            self.send_message(MovementUpdate(up, down))
             print("sent message to pi1")
         else:
             print("Distance sensor invalidated peopleTracker data!")
